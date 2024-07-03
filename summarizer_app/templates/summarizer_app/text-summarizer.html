@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Text Summarizer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -56,16 +57,88 @@
             margin-top: 20px;
             color: #666;
         }
+        #header {
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        }
+
+        .main-content {
+            width: 90vw;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .summ-result {
+            text-align: center;
+        }
+
+        #the-count {
+            float: right;
+            padding: 0.1rem 0 0 0;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
-    <h1>Text Summarizer</h1>
-    <form method="POST">
+    <div id="header">
+        <h1>Text Summarizer</h1>
+    </div>
+    <div class="main-content">
+        <div class="form-summ">
+            <form method="POST" id="formResumirTexto">
+                {% csrf_token %}
+                <label for="text">Digite o texto:</label>
+                <textarea id="text" name="text" rows="25" cols="80" placeholder="Insira o texto..."></textarea>
+                <div id="the-count">
+                    <span id="current">0</span>
+                    <span id="maximum">/ 1024</span>
+                </div>
+                <input type="submit" value="Resumir" id="btnResumir">
+            </form>
+        </div>
+        <div class="summ-result">
+            <p id="summary"> <h2>Resumo:</h2> <br> {{ summary }}</p>
+        </div>
+    </div>
+    <!-- <form method="POST">
         {% csrf_token %}
         <label for="text">Digite o texto:</label>
         <textarea id="text" name="text" rows="10" cols="80"></textarea>
         <input type="submit" value="Resumir">
     </form>
-    <p id="summary">Resumo: {{ summary }}</p>
+    <p id="summary">Resumo: {{ summary }}</p> -->
+
+    <script>
+        $('textarea').keyup(function() {
+    
+            let characterCount = $(this).val().length,
+                current = $('#current'),
+                maximum = $('#maximum'),
+                theCount = $('#the-count');
+            
+            current.text(characterCount);
+        })
+
+        const btnResumir = document.getElementById('btnResumir');
+
+        btnResumir.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const form = document.getElementById('formResumirTexto');
+            const formData = new FormData(form);
+
+            console.log("Pegando FORM");
+            // console.log(formData)
+
+            fetch('http://127.0.0.1:8000/summary-result', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if(response.ok) {
+                    console.log(response.json());
+                }
+            })
+        })
+
+    </script>
 </body>
 </html>
