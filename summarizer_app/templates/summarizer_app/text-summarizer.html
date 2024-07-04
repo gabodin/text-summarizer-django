@@ -69,12 +69,19 @@
 
         .summ-result {
             text-align: center;
+            padding: .5rem;
+            margin-left: 1rem;
         }
 
         #the-count {
             float: right;
             padding: 0.1rem 0 0 0;
             font-size: 0.875rem;
+        }
+
+        #result-summary {
+            font-weight:bold;
+            text-align: justify;
         }
     </style>
 </head>
@@ -87,25 +94,21 @@
             <form method="POST" id="formResumirTexto">
                 {% csrf_token %}
                 <label for="text">Digite o texto:</label>
-                <textarea id="text" name="text" rows="25" cols="80" placeholder="Insira o texto..."></textarea>
+                <textarea id="text" name="text" rows="25" cols="80" placeholder="Insira o texto..." maxlength="4096"></textarea>
                 <div id="the-count">
                     <span id="current">0</span>
-                    <span id="maximum">/ 1024</span>
+                    <span id="maximum">/ 4096</span>
                 </div>
                 <input type="submit" value="Resumir" id="btnResumir">
             </form>
         </div>
         <div class="summ-result">
-            <p id="summary"> <h2>Resumo:</h2> <br> {{ summary }}</p>
+            <h2> Resumo: </h2>
+            <p style="display:none;" id="result-summary"></p>
+            <div id="response-time" style="display:none;"> </div>
         </div>
     </div>
-    <!-- <form method="POST">
-        {% csrf_token %}
-        <label for="text">Digite o texto:</label>
-        <textarea id="text" name="text" rows="10" cols="80"></textarea>
-        <input type="submit" value="Resumir">
-    </form>
-    <p id="summary">Resumo: {{ summary }}</p> -->
+    
 
     <script>
         $('textarea').keyup(function() {
@@ -119,6 +122,9 @@
         })
 
         const btnResumir = document.getElementById('btnResumir');
+        const resultSummary = document.getElementById('result-summary');
+        const responseTimeDiv = document.getElementById('response-time');
+
 
         btnResumir.addEventListener('click', function (event) {
             event.preventDefault();
@@ -126,18 +132,35 @@
             const form = document.getElementById('formResumirTexto');
             const formData = new FormData(form);
 
-            console.log("Pegando FORM");
-            // console.log(formData)
+            const startTime = new Date();
 
+            console.log("SENDING FORM DATA")
             fetch('http://127.0.0.1:8000/summary-result', {
                 method: 'POST',
                 body: formData
-            }).then(response => {
-                if(response.ok) {
-                    console.log(response.json());
-                }
             })
-        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else throw new Error('Response was not ok');
+            })
+            .then(data => {
+                console.log(data);
+
+                const endTime = new Date();
+                const responseTime = endTime - startTime;
+
+                summary = data.summary.replace(/<pad>/g, '').replace(/<\/?s>/g, '');
+                resultSummary.innerText = summary;
+                resultSummary.style.display = 'block';
+
+                responseTimeDiv.innerText = `Response Time: ${responseTime} ms`;
+                responseTimeDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+        });
 
     </script>
 </body>
