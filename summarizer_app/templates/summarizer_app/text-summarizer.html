@@ -83,6 +83,21 @@
             font-weight:bold;
             text-align: justify;
         }
+
+        #loading-text {
+            font-family: Arial;
+            font-size: 1rem;
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        select {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -99,11 +114,20 @@
                     <span id="current">0</span>
                     <span id="maximum">/ 4096</span>
                 </div>
+                <label for="result-size">Tamanho mínimo do resumo:</label>
+                <select id="result-size" name="result-size">
+                    <option value="128">128</option>
+                    <option value="256">256</option>
+                    <option value="512">512</option>
+                </select>
                 <input type="submit" value="Resumir" id="btnResumir">
             </form>
         </div>
         <div class="summ-result">
             <h2> Resumo: </h2>
+            <div id="loading-text" style="display: none;">
+                <p>Isso pode demorar alguns segundos...</p>
+            </div>              
             <p style="display:none;" id="result-summary"></p>
             <div id="response-time" style="display:none;"> </div>
         </div>
@@ -124,10 +148,16 @@
         const btnResumir = document.getElementById('btnResumir');
         const resultSummary = document.getElementById('result-summary');
         const responseTimeDiv = document.getElementById('response-time');
+        const LoadingText = document.getElementById("loading-text");
 
 
         btnResumir.addEventListener('click', function (event) {
             event.preventDefault();
+            
+            resultSummary.innerText = '';
+            responseTimeDiv.innerText = '';
+
+            LoadingText.style.display = "block";
 
             const form = document.getElementById('formResumirTexto');
             const formData = new FormData(form);
@@ -149,12 +179,14 @@
 
                 const endTime = new Date();
                 const responseTime = endTime - startTime;
-
+                
+                LoadingText.style.display = 'none';
+                
                 summary = data.summary.replace(/<pad>/g, '').replace(/<\/?s>/g, '');
                 resultSummary.innerText = summary;
                 resultSummary.style.display = 'block';
 
-                responseTimeDiv.innerText = `Response Time: ${responseTime} ms`;
+                responseTimeDiv.innerText = `Response Time: ${responseTime/1000}s`;
                 responseTimeDiv.style.display = 'block';
             })
             .catch(error => {
