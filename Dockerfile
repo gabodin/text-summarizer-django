@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
   
 EXPOSE 8000 
  
-CMD gunicorn text_summarizer.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn --workers=4 text_summarizer.wsgi:application --bind 0.0.0.0:8000

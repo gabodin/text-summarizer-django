@@ -1,10 +1,7 @@
-import json
-
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
-# Create your views here.
 token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
 model_name = 'recogna-nlp/ptt5-base-summ'
 
